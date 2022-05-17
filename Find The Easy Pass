@@ -1,0 +1,29 @@
+# Find the Easy Pass
+This is an easy box on Hack the Box which is intended to teach us about Reverse Engineering
+
+Downloading the file from the website, we get an .exe application
+Running the `file` command on it, we find out that it is a PE32 executable, for MS Windows
+
+# Opening with Ghidra
+Ghidra is a software designed for Reverse Engineering, developed my the NSA
+To open our file with Ghidra, we simply type out the command `ghidra EasyPass.exe` 
+Doing so, we are presented with the Ghidra project page. At first, we will have no active projects available.
+To add a project, simply click on File, on the upper left corner and select New Project, name your new project and click on Ok
+The next step is to click on the Code Browser, in the Tool Chest pane, the one with a dragon thumbnail.
+Like when first opening Ghidra, our Code Browser will first be empty - to add an application into the Code Browser, you can either press `I` on the keyboard, or go to File > Import File
+
+# Analysing Code
+First thing I like to do when I use Ghidra, is look at the defined strings in the application. To do so, click on Window > Defined Strings. A new pane will open with all the defined strings inside the application
+
+Rummaging through the available strings, one particular string catches our eye - "Wrong Password". Clicking on said string will open it in the Decompiler.
+On the Listing tab, we select the memory address of the found string, and in Ghidra, we select the XREF it has, and then open it in Functional Graph to find out its logic.
+
+In the Function Graph view, we see the logic of the application, and one thing catches our attention - a conditional loop which splits into our known strings - "Good Job" and "Wrong Password". We take a note of the memory address of the two functions - 00454138 and 00454144
+
+# ollydbg
+Ollydbg is a debugger for Windows application and will prove useful in pwning this box
+First, we find the memory address of our found functions 00454138 and 00454144 and we set a breakpoint for the wrong password. To avoid manually searching through all memory addresses, we can use Ctrl + G. To set a breakpoint, simply click on the memory address and press F2 or right click on it > Breakpoint > Toggle
+
+Inspecting the memory addresses further, we find the function which calls our memory address (00454131) and we set a breakpoint for it.
+
+Running the debugger again through the application, we find out the string password that the application compares user input to, and as such we get out flag - "fortran!"
